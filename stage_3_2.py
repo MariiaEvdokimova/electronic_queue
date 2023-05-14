@@ -13,10 +13,11 @@
   Обработать это исключение в программе и сделать такой же выход, как и по пустой строке."""
 
 
-from datetime import datetime
+from datetime import datetime, timedelta
+from random import randint
 def main():
     data = {'codes': "MNPS"}
-    output = {'idc_width': 3, 'surname_width': 15, 'code_width': 3, 'date_width': 23, 'sep': '|', }
+    output = {'idc_width': 3, 'surname_width': 15, 'code_width': 3, 'date_width': 23, 'sep': '|','timing_width': 23, }
     spec = {'data': data, 'output': output}
     idc = 1
     eq = {}
@@ -50,7 +51,7 @@ def is_code_valid(code: str, codes: str) -> bool:
     return code.upper() in codes
 
 def eq_add_client(eq: dict, idc: int, surname: str, code: str) -> list:
-    eq[idc] = {'surname': surname, 'code': code.upper(), 'date': datetime.now()}
+    eq[idc] = {'surname': surname, 'code': code.upper(), 'date': datetime.now(), 'timing': timedelta(seconds = randint(5,10))}
     return eq
 def idc_str(idc:int) -> str:
     return str(idc).zfill(3)
@@ -59,10 +60,12 @@ def table_row_str(idc: int, client: dict, spec: dict) -> str:
     date = client['date'].strftime("%d-%m-%y %H:%M:%S")
     surname = client['surname'] if len(client['surname']) <=10 else client['surname'][:10] + "..."
     sep = spec['output']['sep']
+    timing = str(client['timing'])
     result = f"{sep}{idc_str(idc):^{spec['output']['idc_width']}s}{sep}" + \
-              f"{surname:^{spec['output']['surname_width']}s}{sep}" + \
-              f"{client['code']:^{spec['output']['code_width']}s}{sep}" + \
-              f"{date:^{spec['output']['date_width']}s}{sep}"
+             f"{surname:^{spec['output']['surname_width']}s}{sep}" + \
+             f"{client['code']:^{spec['output']['code_width']}s}{sep}" + \
+             f"{date:^{spec['output']['date_width']}s}{sep}" + \
+             f"{timing:^{spec['output']['timing_width']}s}{sep}"
     return result
 
 def eq_print(eq: dict, version: str, spec: dict) -> None:
