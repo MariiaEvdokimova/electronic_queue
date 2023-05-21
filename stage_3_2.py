@@ -17,7 +17,7 @@ from datetime import datetime, timedelta
 from random import randint
 def main():
     data = {'codes': "MNPS"}
-    output = {'idc_width': 3, 'surname_width': 15, 'code_width': 3, 'date_width': 23, 'sep': '|','timing_width': 23, }
+    output = {'idc_width': 3, 'surname_width': 15, 'code_width': 3, 'date_width': 23, 'sep': '|','timing_width': 7, }
     spec = {'data': data, 'output': output}
     idc = 1
     eq = {}
@@ -26,11 +26,16 @@ def main():
     while True:
         eq_print(eq, version, spec)
         lenght = len(eq)
-        print(f"Перед Вами {lenght} человек{man_cases(lenght)}")
+        if lenght !=0:
+          print(f"Длина очереди перед Вами:{lenght} человек{man_cases(lenght)}")
+          mean = sum([client['timing'] for client in eq.values()], start=timedelta(0,0,0,0,0,0))
+          mean1 = str(mean/lenght)[2:7]
+          print(f"Среднее время обслуживания клиента: {mean1}")
         data = input("Введите фамилию, или пустая строка для выхода: ")
         if data == "":
-            print("Всего вам доброго! До свидания!")
-            break
+            #print("Всего вам доброго! До свидания!")
+            #break
+            raise KeyboardInterrupt
         while True:
             code = input(f"Введите код операции. Допустимые коды: {spec['data']['codes']}: ")
             if is_code_valid(code, spec['data']['codes']):
@@ -60,28 +65,38 @@ def table_row_str(idc: int, client: dict, spec: dict) -> str:
     date = client['date'].strftime("%d-%m-%y %H:%M:%S")
     surname = client['surname'] if len(client['surname']) <=10 else client['surname'][:10] + "..."
     sep = spec['output']['sep']
-    timing = str(client['timing'])
+    timing = str(client['timing'])[2:]
     result = f"{sep}{idc_str(idc):^{spec['output']['idc_width']}s}{sep}" + \
              f"{surname:^{spec['output']['surname_width']}s}{sep}" + \
              f"{client['code']:^{spec['output']['code_width']}s}{sep}" + \
              f"{date:^{spec['output']['date_width']}s}{sep}" + \
              f"{timing:^{spec['output']['timing_width']}s}{sep}"
     return result
-
 def eq_print(eq: dict, version: str, spec: dict) -> None:
     print(f"Электронная очередь. Версия {version}")
-    total_width = spec['output']['idc_width'] + spec['output']['surname_width'] + spec['output']['code_width'] + \
-                  spec['output']['date_width'] + 5
+
+    idc_width = spec['output']['idc_width']
+    surname_width = spec['output']['surname_width']
+    code_width = spec['output']['code_width']
+    date_width = spec['output']['date_width']
+    timing_width = spec['output']['timing_width']
+
+    total_width = idc_width + surname_width + code_width + date_width + timing_width + 6
     print("-" * total_width)
     sep = spec['output']['sep']
-    haeder = f"{sep}{'№':^{spec['output']['idc_width']}s}{sep}" + \
-             f"{'Фамилия':^{spec['output']['surname_width']}s}{sep}" + \
-             f"{'Код':^{spec['output']['code_width']}s}{sep}" + \
-             f"{'Время':^{spec['output']['date_width']}s}{sep}"
-    print(haeder)
+
+    header = f"{sep}{'№':^{idc_width }s}{sep}" + \
+             f"{'Фамилия':^{surname_width}s}{sep}" + \
+             f"{'Код':^{code_width}s}{sep}" + \
+             f"{'Время':^{date_width}s}{sep}" + \
+             f"{'Длит.':^{timing_width}s}{sep}"
+    print(header)
     print("-" * total_width)
     for idc, client in eq.items(): #{'surname': ххх, 'code': ххх}
         print(table_row_str(idc, client, spec))
     print("-" * total_width)
 
-main()
+try:
+   main()
+except KeyboardInterrupt: #проверка в консоли
+    print("\nВсего вам доброго! До свидания!")
